@@ -14,3 +14,5 @@ RUN apt-get update \
 RUN fc-cache -fv
 RUN pip install torch
 RUN pip install plotnine patchworklib scikit-learn ipykernel
+
+RUN pip install plotnine --upgrade
