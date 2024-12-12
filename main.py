@@ -13,9 +13,10 @@ def main():
     logger = logging.getLogger("CPSC 545 main")
     parser = ArgumentParser()
     parser.add_argument("--output_dir", type=str, help="Output directory", required=True)
+    parser.add_argument("--overwrite", action="store_true", help="Overwrite the output directory if it exists")
     args = parser.parse_args()
 
-    pipeline(output_dir=Path(args.output_dir), logger=logger)
+    pipeline(output_dir=Path(args.output_dir), logger=logger, overwrite=args.overwrite)
 
 
 if __name__ == "__main__":
