@@ -1,6 +1,6 @@
 # cpsc545-project
-CPSC 545 final project
 
+To reproduce all analyses, please run:
 
 ```
 docker build -t myimg .
