@@ -1,5 +1,5 @@
 from pathlib import Path
-from .steps import step_1
+from .steps import step_1, step_2
 
 def pipeline(output_dir: Path, logger, overwrite: bool = False):
     """Pipeline: runs the pipeline for the project.
@@ -19,3 +19,4 @@ def pipeline(output_dir: Path, logger, overwrite: bool = False):
     
     
     step_1(output_dir=output_dir, logger=logger, overwrite=overwrite)
+    step_2(output_dir=output_dir, logger=logger, overwrite=overwrite)

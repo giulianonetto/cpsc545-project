@@ -1,10 +1,12 @@
 from typing import Optional
 from sklearn.datasets import make_blobs
 from .pppca import get_top_eigenvectors
-import matplotlib.pyplot as plt
 from plotnine import *
 import pandas as pd
 import numpy as np
+
+SIMULATION_SCENARIOS = [1, 2, 3, 4]
+N_SIMULATIONS = 5
 
 def sample_mvnorm(sample_size, number_of_features, rho=0.0, var=2):
     """
@@ -110,16 +112,16 @@ def simulate_data(n: int, N: int, scenario: int = 1, complete_data: bool = False
     match scenario:
         case 1:
             # strong cluster effect, accurate prediction
-            X, X_tilde = sample_features(n=n, N=N, d=500, var_g=5.0, var_e=1.0, effect_e=1.0, complete_data=complete_data)
+            X, X_tilde = sample_features(n=n, N=N, d=1000, var_g=5.0, var_e=1.0, effect_e=1.0, complete_data=complete_data)
         case 2:
             # strong cluster effect, inaccurate prediction
-            X, X_tilde = sample_features(n=n, N=N, d=500, var_g=1.0, var_e=5.0, effect_e=1.0, complete_data=complete_data)
+            X, X_tilde = sample_features(n=n, N=N, d=1000, var_g=1.0, var_e=5.0, effect_e=1.0, complete_data=complete_data)
         case 3:
             # weak cluster effect, accurate prediction
-            X, X_tilde = sample_features(n=n, N=N, d=500, var_g=5.0, var_e=1.0, effect_e=0.001, complete_data=complete_data)
+            X, X_tilde = sample_features(n=n, N=N, d=1000, var_g=5.0, var_e=1.0, effect_e=0.001, complete_data=complete_data)
         case 4:
             # weak cluster effect, inaccurate prediction
-            X, X_tilde = sample_features(n=n, N=N, d=500, var_g=1.0, var_e=5.0, effect_e=0.001, complete_data=complete_data)
+            X, X_tilde = sample_features(n=n, N=N, d=1000, var_g=1.0, var_e=5.0, effect_e=0.001, complete_data=complete_data)
         case _:
             raise ValueError(f"Invalid scenario number={scenario}")
     

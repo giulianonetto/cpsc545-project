@@ -1,6 +1,6 @@
 from pathlib import Path
 import patchworklib as pw
-from .simulation import plot_scenario
+from .simulation import plot_scenario, SIMULATION_SCENARIOS
 from .experiment import run_experiment
 import pandas as pd
 
@@ -25,7 +25,7 @@ def step_1(output_dir: Path, logger, overwrite: bool = False):
     output_dir.mkdir(parents=True, exist_ok=True)
     
     all_scenario_plots = []
-    for scenario in [1, 2, 3, 4]:
+    for scenario in SIMULATION_SCENARIOS:
         scenario_plots = plot_scenario(scenario=scenario)
         for _, plot in enumerate(scenario_plots):
             all_scenario_plots.append(pw.load_ggplot(plot, figsize=(4,4)))
@@ -67,9 +67,33 @@ def step_2(output_dir: Path, logger, overwrite: bool = False):
     output_dir.mkdir(parents=True, exist_ok=True)
     
     all_results = []
-    for scenario in [1, 2, 3, 4]:
+    all_plots = []
+    for scenario in SIMULATION_SCENARIOS:
         experiment_results = run_experiment(scenario=scenario, output_dir=output_dir)
-        all_results.append(experiment_results)
+        all_results.append(experiment_results[0])
+        all_plots.append(experiment_results[1])
     
-    all_results = pd.DataFrame(all_results)
-    all_results.to_csv(output_dir.joinpath("all_results.csv"), index=False, sep="\t")
+    # save results dataframe to file
+    summary_funs = ["mean", "std", "size"]
+    summary_funs = {
+        "observed_only": summary_funs,
+        "predictions_only": summary_funs,
+        "pppca": summary_funs
+    }
+    all_results = pd.concat(all_results).groupby('scenario').agg(summary_funs)
+    all_results.reset_index().to_csv(output_dir.joinpath("all_results.csv"), index=False, sep="\t")
+    
+    _all_results_copy = all_results.copy()
+    _all_results_copy.columns = all_results.columns.get_level_values(0)
+    _all_results_copy.reset_index().to_csv(output_dir.joinpath("all_results2.csv"), index=False, sep="\t")
+    
+    # build figure 2 with all four plots
+    figure2 = (
+        all_plots[0] | all_plots[1]
+    ) / (
+        all_plots[2] | all_plots[3] 
+    )
+    
+    logger.info(f"Saving Figure 2 to {output_dir.joinpath('all_results.png').absolute()}")
+    figure2.savefig(output_dir.joinpath("all_results.png"), dpi=300, quick=True)
+    
