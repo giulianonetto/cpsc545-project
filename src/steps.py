@@ -46,7 +46,7 @@ def step_1(output_dir: Path, logger, overwrite: bool = False):
     
     
         
-def step_2(output_dir: Path, logger, overwrite: bool = False):
+def step_2(output_dir: Path, logger, overwrite: bool = False, scenarios: str = "all"):
     """Step 2: generate Figure 2 in the report containing a results of all simulation scenarios.
 
     Args:
@@ -66,12 +66,18 @@ def step_2(output_dir: Path, logger, overwrite: bool = False):
     
     output_dir.mkdir(parents=True, exist_ok=True)
     
+    if scenarios == "all":
+        scenarios = SIMULATION_SCENARIOS
+    else:
+        scenarios = [int(s) for s in scenarios.split(",")]
+    
     all_results = []
     all_plots = []
     for scenario in SIMULATION_SCENARIOS:
-        experiment_results = run_experiment(scenario=scenario, output_dir=output_dir)
-        all_results.append(experiment_results[0])
-        all_plots.append(experiment_results[1])
+        if scenario in scenarios:
+            experiment_results = run_experiment(scenario=scenario, output_dir=output_dir)
+            all_results.append(experiment_results[0])
+            all_plots.append(experiment_results[1])
     
     # save results dataframe to file
     summary_funs = ["mean", "std", "size"]

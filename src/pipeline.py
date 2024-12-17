@@ -1,7 +1,8 @@
 from pathlib import Path
 from .steps import step_1, step_2
 
-def pipeline(output_dir: Path, logger, overwrite: bool = False):
+def pipeline(output_dir: Path, logger, overwrite: bool = False,
+             steps: str = "all", scenarios: str = "all"):
     """Pipeline: runs the pipeline for the project.
 
     Args:
@@ -18,5 +19,8 @@ def pipeline(output_dir: Path, logger, overwrite: bool = False):
         logger.warn(f"Output directory {output_dir.absolute()} already exists and the contents will be overwritten.")
     
     
-    step_1(output_dir=output_dir, logger=logger, overwrite=overwrite)
-    step_2(output_dir=output_dir, logger=logger, overwrite=overwrite)
+    if "1" in steps or steps == "all":
+        step_1(output_dir=output_dir, logger=logger, overwrite=overwrite)
+    
+    if "2" in steps or steps == "all":
+        step_2(output_dir=output_dir, logger=logger, overwrite=overwrite, scenarios=scenarios)

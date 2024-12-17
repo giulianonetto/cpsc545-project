@@ -6,7 +6,8 @@ import pandas as pd
 import numpy as np
 
 SIMULATION_SCENARIOS = [1, 2, 3, 4]
-N_SIMULATIONS = 5
+N_SIMULATIONS = 100
+N_FEATURES = 1000
 
 def sample_mvnorm(sample_size, number_of_features, rho=0.0, var=2):
     """

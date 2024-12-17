@@ -20,3 +20,23 @@ def get_top_eigenvectors(mat, L=3):
     eigenvalues = eigenvalues[sorted_indices]
     eigenvectors = eigenvectors[:, sorted_indices]
     return eigenvectors[:, :L]
+
+def normalized_frobenius_inner_product(A, B):
+    # Compute the Frobenius inner product
+    frobenius_inner_product = np.trace(np.dot(A.T, B))
+    
+    # Compute the Frobenius norms of A and B
+    norm_A = np.linalg.norm(A, 'fro')
+    norm_B = np.linalg.norm(B, 'fro')
+    
+    # Compute the normalized Frobenius inner product
+    similarity = frobenius_inner_product / (norm_A * norm_B)
+    
+    return similarity
+
+def get_omega(s_n, s_tilde_n, s_tilde_N, l=None):
+    # Compute the matrix omega
+    if l is None:
+        l = normalized_frobenius_inner_product(s_n, s_tilde_n)
+    
+    return s_n + l * (s_tilde_N - s_tilde_n)

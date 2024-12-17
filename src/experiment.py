@@ -1,6 +1,6 @@
 from pathlib import Path
 from .simulation import simulate_data, SIMULATION_SCENARIOS, N_SIMULATIONS
-from .pppca import get_top_eigenvectors
+from .pppca import get_top_eigenvectors, get_omega
 import numpy as np
 import pandas as pd
 from plotnine import *
@@ -24,7 +24,7 @@ def run_experiment(scenario: int, output_dir: Path):
     
     
     # set up training data sizes
-    n, N = 10, 5_000
+    n, N = 50, 5_000
     # number of components to extract
     L = 300
     reconstruction_errors = {
@@ -43,7 +43,7 @@ def run_experiment(scenario: int, output_dir: Path):
         s_tilde_n = np.cov(x_tilde[:n,:], rowvar=False)
         s_tilde_N = np.cov(x_tilde[n:,:], rowvar=False)
         s_tilde_all = np.cov(x_tilde, rowvar=False)
-        omega = s_n - s_tilde_n + s_tilde_N
+        omega = get_omega(s_n, s_tilde_n, s_tilde_N, l=1.0)
         
         w_obs_only = get_top_eigenvectors(s_n, L=L)
         w_pred_only = get_top_eigenvectors(s_tilde_all, L=L)
@@ -80,10 +80,10 @@ def plot_experiment_results(reconstruction_errors: pd.DataFrame, output_dir: Pat
         scenario (int): The scenario number.
     """
     # melt reconstruction_errors for plotting
-    reconstruction_errors = reconstruction_errors.melt(var_name="method", value_name="error")
+    reconstruction_errors_long = reconstruction_errors.melt(var_name="method", value_name="error")
     
     # build a boxplot of the reconstruction errors
-    boxplot = ggplot(reconstruction_errors.query("method!='scenario'"), aes(x="method", y="error")) + \
+    boxplot = ggplot(reconstruction_errors_long.query("method!='scenario'"), aes(x="method", y="error")) + \
         geom_boxplot() + \
         labs(x="Method", y="Reconstruction Error") + \
         theme_classic(base_size=18) + \
@@ -93,5 +93,21 @@ def plot_experiment_results(reconstruction_errors: pd.DataFrame, output_dir: Pat
         )
     # save plot
     boxplot.save(output_dir.joinpath(f"scenario_{scenario}_experiment_results.png"), dpi=300, verbose=False)
+    
+    reconstruction_errors["pppca_vs_observed"] = reconstruction_errors["pppca"] - reconstruction_errors["observed_only"]
+    reconstruction_errors["predictions_vs_observed"] = reconstruction_errors["predictions_only"] - reconstruction_errors["observed_only"]
+    reconstruction_errors["pppca_vs_predictions"] = reconstruction_errors["pppca"] - reconstruction_errors["predictions_only"]
+    # make three density plots for the differences and save them
+    for col in ["pppca_vs_observed", "predictions_vs_observed", "pppca_vs_predictions"]:
+        density = ggplot(reconstruction_errors, aes(x=col)) + \
+            geom_histogram() + \
+            labs(x=col.replace("_", " ")) + \
+            theme_classic(base_size=18) + \
+            theme(
+                plot_background=element_rect(fill='white'),
+                figure_size=(4, 3)
+            )
+        density.save(output_dir.joinpath(f"scenario_{scenario}_{col}_differences.png"), dpi=300, verbose=False)
+    
     
     return pw.load_ggplot(boxplot, figsize=(4, 3))
